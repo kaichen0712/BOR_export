@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOR 排班系統</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-pattern"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M4 16H44" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="20" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="28" cy="12" r="2" fill="currentColor"/>
+                    <rect x="10" y="22" width="8" height="6" rx="1" fill="currentColor" opacity="0.6"/>
+                    <rect x="20" y="22" width="8" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+                    <rect x="30" y="22" width="8" height="6" rx="1" fill="currentColor" opacity="0.4"/>
+                    <rect x="10" y="30" width="8" height="6" rx="1" fill="currentColor" opacity="0.4"/>
+                    <rect x="20" y="30" width="8" height="6" rx="1" fill="currentColor" opacity="0.6"/>
+                    <rect x="30" y="30" width="8" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+                </svg>
+            </div>
+            <h1>BOR 排班系統</h1>
+            <p class="subtitle">上傳值班表 · 產生排班紀錄</p>
+        </header>
+
+        <main>
+            <!-- 步驟指示器 -->
+            <div class="steps">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">上傳檔案</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">設定參數</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">產生下載</div>
+                </div>
+            </div>
+
+            <!-- 步驟 1: 上傳檔案 -->
+            <section class="card step-panel" id="step1-panel">
+                <h2><span class="card-icon">📁</span>上傳值班表</h2>
+                <p class="description">
+                    請上傳包含 <strong>[主值]</strong>、<strong>[副值]</strong>、<strong>[身分]</strong> 三個頁籤的 Excel 檔案
+                </p>
+                
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.xlsm" hidden>
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M32 8L32 40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M20 20L32 8L44 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 40V52C8 54.2091 9.79086 56 12 56H52C54.2091 56 56 54.2091 56 52V40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <p class="upload-text">點擊或拖放檔案到此處</p>
+                    <p class="upload-hint">支援 .xlsx, .xlsm 格式</p>
+                </div>
+
+                <div class="file-info" id="file-info" style="display: none;">
+                    <div class="file-icon">
+                        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 4H20L26 10V28H8V4Z" fill="#1a7f64" opacity="0.2"/>
+                            <path d="M8 4H20L26 10V28H8V4Z" stroke="#1a7f64" stroke-width="2"/>
+                            <path d="M20 4V10H26" stroke="#1a7f64" stroke-width="2"/>
+                            <path d="M12 18H22M12 22H22M12 14H16" stroke="#1a7f64" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="file-details">
+                        <p class="file-name" id="file-name">檔案名稱.xlsx</p>
+                        <p class="file-staff" id="file-staff">已載入 0 位人員</p>
+                    </div>
+                    <button class="btn-icon" id="clear-file" title="移除檔案">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="template-section">
+                    <h3>
+                        <span class="optional-tag">選填</span>
+                        上傳輸出模板
+                    </h3>
+                    <p class="hint">如果您有自訂的排班表模板，可以在此上傳（否則將使用預設模板）</p>
+                    
+                    <div class="upload-area small" id="template-upload-area">
+                        <input type="file" id="template-input" accept=".xlsx,.xls,.xlsm" hidden>
+                        <span class="upload-text-inline">點擊上傳模板檔案</span>
+                    </div>
+                    
+                    <div class="file-info small" id="template-info" style="display: none;">
+                        <div class="file-icon small">📋</div>
+                        <span class="file-name" id="template-name">模板.xlsx</span>
+                        <button class="btn-icon small" id="clear-template" title="移除模板">×</button>
+                    </div>
+                </div>
+
+                <button class="btn primary" id="btn-next-1" disabled>
+                    繼續下一步
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </section>
+
+            <!-- 步驟 2: 設定參數 -->
+            <section class="card step-panel" id="step2-panel" style="display: none;">
+                <h2><span class="card-icon">⚙️</span>設定排班參數</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year-select">年份</label>
+                        <select id="year-select" class="select-input">
+                            <!-- 動態填入 -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="month-select">月份</label>
+                        <select id="month-select" class="select-input">
+                            <!-- 動態填入 -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="staff-order">
+                        人員排序
+                        <span class="hint-inline">（每行一位，用於輸出順序）</span>
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea id="staff-order" rows="10" placeholder="王小明&#10;李小華&#10;張大偉&#10;..."></textarea>
+                        <div class="textarea-actions">
+                            <button class="btn-text" id="btn-auto-fill" title="自動填入已載入的人員">
+                                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                自動填入(順序依照身分頁籤)
+                            </button>
+                            <button class="btn-text" id="btn-clear-staff" title="清空">
+                                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 6H16M6 6V16C6 17 7 18 8 18H12C13 18 14 17 14 16V6M8 6V4C8 3 9 2 10 2C11 2 12 3 12 4V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                清空
+                            </button>
+                        </div>
+                    </div>
+                    <p class="hint">提示：您可以直接複製貼上名單，系統會按此順序輸出排班表</p>
+                </div>
+
+                <div class="staff-preview" id="staff-preview">
+                    <h4>已載入人員（<span id="loaded-count">0</span> 人）</h4>
+                    <div class="staff-tags" id="staff-tags">
+                        <!-- 動態填入 -->
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn secondary" id="btn-back-2">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        返回上一步
+                    </button>
+                    <button class="btn primary" id="btn-generate">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        產生排班表
+                    </button>
+                </div>
+            </section>
+
+            <!-- 步驟 3: 產生下載 -->
+            <section class="card step-panel" id="step3-panel" style="display: none;">
+                <div class="result-container">
+                    <div class="result-icon success" id="result-icon">
+                        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3"/>
+                            <path d="M20 32L28 40L44 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h2 id="result-title">排班表已產生！</h2>
+                    <p class="result-desc" id="result-desc">您的排班表已經處理完成，點擊下方按鈕下載檔案</p>
+                    
+                    <div class="download-box" id="download-box">
+                        <div class="download-file-icon">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 6H30L38 14V42H12V6Z" fill="#1a7f64" opacity="0.2"/>
+                                <path d="M12 6H30L38 14V42H12V6Z" stroke="#1a7f64" stroke-width="2"/>
+                                <path d="M30 6V14H38" stroke="#1a7f64" stroke-width="2"/>
+                                <path d="M25 24V34M25 34L20 29M25 34L30 29" stroke="#1a7f64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="download-info">
+                            <p class="download-filename" id="download-filename">BOR_202602_xxx.xlsx</p>
+                            <p class="download-hint">Excel 格式</p>
+                        </div>
+                        <a class="btn primary download-btn" id="download-btn" href="#" download>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 4V16M12 16L7 11M12 16L17 11M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            下載檔案
+                        </a>
+                    </div>
+
+                    <button class="btn secondary" id="btn-restart">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 12C4 7.58172 7.58172 4 12 4C15.0736 4 17.7487 5.80151 19 8.4M20 12C20 16.4183 16.4183 20 12 20C8.92638 20 6.25129 18.1985 5 15.6M4 4V8H8M20 20V16H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        重新開始
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading 遮罩 -->
+            <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p id="loading-text">正在處理中...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>BOR 排班系統 © 2024</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+

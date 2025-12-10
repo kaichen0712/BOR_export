@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 測試用的 Excel 檔案（不要上傳）
+*.xlsx
+*.xlsm
+*.xls
+*.zip
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# 暫存資料夾
+uploads/
+outputs/
+templates_excel/
+
+# 日誌
+*.log
+
